@@ -11,7 +11,16 @@
   </url>
   
   <url>
-    <loc>https://luoxh8.github.io/categories/index.html</loc>
+    <loc>https://luoxh8.github.io/tech/index.html</loc>
+    
+    <lastmod>2026-05-29</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://luoxh8.github.io/resume/index.html</loc>
     
     <lastmod>2026-05-29</lastmod>
     
@@ -30,6 +39,15 @@
   
   <url>
     <loc>https://luoxh8.github.io/tags/index.html</loc>
+    
+    <lastmod>2026-05-29</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://luoxh8.github.io/categories/index.html</loc>
     
     <lastmod>2026-05-29</lastmod>
     
@@ -155,14 +173,14 @@
 
   
   <url>
-    <loc>https://luoxh8.github.io/tags/Django/</loc>
+    <loc>https://luoxh8.github.io/tags/%E8%BF%90%E7%BB%B4/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://luoxh8.github.io/tags/%E8%BF%90%E7%BB%B4/</loc>
+    <loc>https://luoxh8.github.io/tags/Django/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -183,14 +201,14 @@
   </url>
   
   <url>
-    <loc>https://luoxh8.github.io/tags/Python/</loc>
+    <loc>https://luoxh8.github.io/tags/IDE/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://luoxh8.github.io/tags/IDE/</loc>
+    <loc>https://luoxh8.github.io/tags/Python/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -227,14 +245,14 @@
 
   
   <url>
-    <loc>https://luoxh8.github.io/categories/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/</loc>
+    <loc>https://luoxh8.github.io/categories/%E5%90%8E%E7%AB%AF/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://luoxh8.github.io/categories/%E5%90%8E%E7%AB%AF/</loc>
+    <loc>https://luoxh8.github.io/categories/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

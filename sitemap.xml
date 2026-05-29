@@ -11,6 +11,15 @@
   </url>
   
   <url>
+    <loc>https://luoxh8.github.io/tags/index.html</loc>
+    
+    <lastmod>2026-05-29</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://luoxh8.github.io/categories/index.html</loc>
     
     <lastmod>2026-05-29</lastmod>
@@ -21,15 +30,6 @@
   
   <url>
     <loc>https://luoxh8.github.io/wx/index.html</loc>
-    
-    <lastmod>2026-05-29</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://luoxh8.github.io/tags/index.html</loc>
     
     <lastmod>2026-05-29</lastmod>
     

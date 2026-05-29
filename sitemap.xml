@@ -2,15 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://luoxh8.github.io/categories/index.html</loc>
-    
-    <lastmod>2026-05-29</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://luoxh8.github.io/wx/index.html</loc>
     
     <lastmod>2026-05-29</lastmod>
@@ -21,6 +12,15 @@
   
   <url>
     <loc>https://luoxh8.github.io/tags/index.html</loc>
+    
+    <lastmod>2026-05-29</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://luoxh8.github.io/categories/index.html</loc>
     
     <lastmod>2026-05-29</lastmod>
     
@@ -146,21 +146,7 @@
 
   
   <url>
-    <loc>https://luoxh8.github.io/tags/Django/</loc>
-    <lastmod>2026-05-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://luoxh8.github.io/tags/Git/</loc>
-    <lastmod>2026-05-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://luoxh8.github.io/tags/mac%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -174,7 +160,21 @@
   </url>
   
   <url>
+    <loc>https://luoxh8.github.io/tags/Django/</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://luoxh8.github.io/tags/IDE/</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://luoxh8.github.io/tags/mac%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -190,21 +190,7 @@
 
   
   <url>
-    <loc>https://luoxh8.github.io/categories/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/</loc>
-    <lastmod>2026-05-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://luoxh8.github.io/categories/%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6/</loc>
-    <lastmod>2026-05-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://luoxh8.github.io/categories/mac%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -218,7 +204,21 @@
   </url>
   
   <url>
+    <loc>https://luoxh8.github.io/categories/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://luoxh8.github.io/categories/IDE/</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://luoxh8.github.io/categories/mac%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

@@ -1442,3 +1442,4 @@ body, button {
     background: url(img/mute.png) left center no-repeat;
     display: none;
 }
+.nojavascript{display:none}

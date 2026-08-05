@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Django 使用第三方存储服务器 · Luoxh&#39;s Blog</title><meta name="description" content="随着服务器运作，难免有些时候需要上传文件"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/django-oss-storage/"><meta property="og:type" content="website"><meta property="og:title" content="Django 使用第三方存储服务器 · Luoxh's Blog"><meta property="og:description" content="随着服务器运作，难免有些时候需要上传文件"><meta property="og:url" content="https://luoxh8.github.io/posts/django-oss-storage/"><meta property="og:image" content="https://luoxh8.github.io/img/qiniu.jpg"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/_astro/Base.XHha6hsQ.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E5%90%8E%E7%AB%AF%E5%BC%80%E5%8F%91/">后端开发</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #3b82f6, #06b6d4)"><div class="hero-icon">🗄️</div><h1>Django 使用第三方存储服务器</h1><p class="hero-desc">随着服务器运作，难免有些时候需要上传文件</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2018-05-20</span><span class="hero-meta-chip">🔄 更新于 2018-06-22</span><span class="hero-meta-chip">⏱ 3 分钟阅读</span><span class="hero-meta-chip">🛠️ 后端开发</span></div></div><div class="prose"><p>随着服务器运作，难免有些时候需要上传文件。上传文件自然是在云服务器上，日积月累，慢慢地服务器存储空间越来越少。而且服务器迁移和备份都不方便，使用这些资源时也占用大量服务器流量。</p>
+<p>较好的解决方案是使用第三方存储服务器，例如七牛、阿里云 OSS、亚马逊 S3 等。将文件都放到这些存储服务器，可以减少服务器负担。服务器只剩下必要的静态文件和代码。</p>
+<p>以阿里云 OSS 为例，讲解如何使用第三方存储服务器。（刚好最近用到这个，而且 Django 有其他人写好的第三方库）</p>
+<h2 id="准备工作">准备工作</h2>
+<p>首先，需要拥有 OSS。这个去阿里云购买即可。购买之后可得到密钥等一系列信息。</p>
+<p>接着，安装 <code>oss2</code> 库，该库是 Python 对应 oss 的操作库。</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pip</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> oss2</span></span></code></pre>
+<p>再安装或下载 Django OSS 的 Storage 库。这些库是继承 Django 的 <code>Storage</code> 类，并重写相关方法。Django 的 <code>Storage</code> 是管理上传文件的存储。如何自定义 Storage 可参考 <a href="https://docs.djangoproject.com/en/1.11/howto/custom-file-storage/">Django 官方文档</a>。</p>
+<p>执行如下命令，安装 <code>django-aliyun-oss2-storage</code>：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pip</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> django-aliyun-oss2-storage</span></span></code></pre>
+<p>也可以不用 pip 安装，打开<a href="https://github.com/xiewenya/django-aliyun-oss2-storage">该第三方库的 Github</a>，下载源码到本地。这里我需要修改部分代码，所以直接下载把整个包放到 Django 项目的根目录（也可其他位置）。</p>
+<h2 id="配置-settings">配置 Settings</h2>
+<p>安装下载完成之后，配置 Django 的 Settings，添加如下设置：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 使用 OSS 存储文件</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">DEFAULT_FILE_STORAGE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'aliyun_oss2_storage.backends.AliyunMediaStorage'</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 配置 OSS 信息</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">ACCESS_KEY_ID</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "xxxxxxxxxxx"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">ACCESS_KEY_SECRET</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "xxxxxxxxxxx"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">END_POINT</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "oss-cn-shenzhen.aliyuncs.com"</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # OSS 存储节点</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">BUCKET_NAME</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "xxx"</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">BUCKET_ACL_TYPE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "public-read"</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # private, public-read, public-read-write</span></span></code></pre>
+<p>另外，还有两个对应参数需要注意一下，<code>MEDIA_ROOT</code> 和 <code>MEDIA_URL</code>。</p>
+<p><code>MEDIA_ROOT</code> 是媒体文件的上传位置根目录，由于设置了 <code>BUCKET_NAME</code>，一般在这个 bucket 中。可以设置为空字符串。文件自然上传到 Django 模版的 <code>FileField</code> 字段设置的 <code>upload_to</code> 位置。</p>
+<p><code>MEDIA_URL</code> 是获取媒体文件的链接前缀，可根据自己的 oss 文件链接位置添加。</p>
+<p>由于上传的文件需要开放被用户下载，<code>BUCKET_ACL_TYPE</code> 设置为公共的。若你的静态文件也需要上传到 OSS 中，设置如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 设置上传的静态文件</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">STATICFILES_STORAGE</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'aliyun_oss2_storage.backends.AliyunStaticStorage'</span></span></code></pre>
+<p>设置无误后，重启 Django 即可使用。上传文件将自动上传到 OSS 中。</p>
+<h2 id="解决下载文件名乱码">解决下载文件名乱码</h2>
+<p>上面提到我要修改里面的源码。因为发现上传的文件在下载时的文件名是一串乱码，不是上传时的文件名。这个需要设置一些 header 信息，可参考 <a href="https://help.aliyun.com/document_detail/31978.html">OSS 的 SDK 文档</a>。该 header 需要在上传文件时就提交，而上面的 <code>django-aliyun-oss2-storage</code> 在上传文件时没有写入 header 信息。</p>
+<p>打开该包的源码文件 <code>backends.py</code>，找到 <code>AliyunBaseStorage</code> 类的 <code>_save</code> 方法。修改如下：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> _save</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(self, name, content):</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 获得文件名</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    filename </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> str</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(content)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # 设置 header</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    headers </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    headers[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'Content-Type'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'application/octet-stream'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    headers[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'Content-Disposition'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">] </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'attachment; filename=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">%s</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'</span><span style="color:#D73A49;--shiki-dark:#F97583"> %</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> filename</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    # get oss' target name</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    name </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._get_target_name(name)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    content.open()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    content_str </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> b</span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.join(chunk </span><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> chunk </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> content.chunks())</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.bucket.put_object(name, content_str, </span><span style="color:#E36209;--shiki-dark:#FFAB70">headers</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">headers)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># add headers</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    content.close()</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    return</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> self</span><span style="color:#24292E;--shiki-dark:#E1E4E8">._clean_name(name)</span></span></code></pre>
+<p>这样设置，点击文件链接，即可下载并且下载文件名是上传的文件名。若你不是什么类型文件都需要这么处理，可以判断 <code>filename</code> 的后缀名加以处理。</p>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/python-singleton-new/"><div class="nav-label">← 上一篇</div><div class="nav-title">Python 使用 __new__ 方法实现单例模式</div></a><span></span></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#准备工作">准备工作</a></li><li style="margin-left:0rem"><a href="#配置-settings">配置 Settings</a></li><li style="margin-left:0rem"><a href="#解决下载文件名乱码">解决下载文件名乱码</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/_astro/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://luoxh8.github.io/sitemap.xml
 
-# Disallow admin pages
-Disallow: /admin/
+Sitemap: https://luoxh8.github.io/sitemap-index.xml

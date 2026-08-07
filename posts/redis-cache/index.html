@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Redis 缓存实战 · Luoxh&#39;s Blog</title><meta name="description" content="缓存能扛住大部分读流量，但用不好会引入穿透、击穿、雪崩和一致性问题"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/redis-cache/"><meta property="og:type" content="website"><meta property="og:title" content="Redis 缓存实战 · Luoxh's Blog"><meta property="og:description" content="缓存能扛住大部分读流量，但用不好会引入穿透、击穿、雪崩和一致性问题"><meta property="og:url" content="https://luoxh8.github.io/posts/redis-cache/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E4%B8%AD%E9%97%B4%E4%BB%B6/">数据库与中间件</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #10b981, #34d399)"><div class="hero-icon">🧊</div><h1>Redis 缓存实战</h1><p class="hero-desc">缓存能扛住大部分读流量，但用不好会引入穿透、击穿、雪崩和一致性问题</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 2 分钟阅读</span><span class="hero-meta-chip">🗄️ 数据库与中间件</span></div></div><div class="prose"><p>缓存能扛住大部分读流量，但用不好会引入穿透、击穿、雪崩和一致性问题。</p>
+<h2 id="基本用法">基本用法</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ProductService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Autowired</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> StringRedisTemplate redis;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Product </span><span style="color:#6F42C1;--shiki-dark:#B392F0">getById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Long </span><span style="color:#E36209;--shiki-dark:#FFAB70">id</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String key </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "product:"</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> id;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        String cached </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">get</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (cached </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> JSON.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">parseObject</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(cached, Product.class);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        Product product </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> productMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">selectById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(id);</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (product </span><span style="color:#D73A49;--shiki-dark:#F97583">!=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key, JSON.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">toJSONString</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(product), </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, TimeUnit.MINUTES);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> product;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="缓存穿透">缓存穿透</h2>
+<p>查询不存在的 key，请求直接打到数据库：</p>
+<p>解决方案：</p>
+<ol>
+<li><strong>缓存空值</strong>：不存在的也缓存，设置短过期</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (product </span><span style="color:#D73A49;--shiki-dark:#F97583">==</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> null</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">""</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, TimeUnit.MINUTES);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ol start="2">
+<li><strong>布隆过滤器</strong>：先判断 key 是否可能存在</li>
+</ol>
+<h2 id="缓存击穿">缓存击穿</h2>
+<p>热点 key 过期瞬间，大量请求同时打到数据库：</p>
+<p>解决方案：<strong>互斥锁</strong>重建缓存</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">String lockKey </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "lock:"</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> key;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">if</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> (redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">setIfAbsent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(lockKey, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"1"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">10</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, TimeUnit.SECONDS)) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    try</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">        // 查库并重建缓存</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    } </span><span style="color:#D73A49;--shiki-dark:#F97583">finally</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(lockKey);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">} </span><span style="color:#D73A49;--shiki-dark:#F97583">else</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 没拿到锁，短暂等待后重试</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    Thread.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">sleep</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">50</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="缓存雪崩">缓存雪崩</h2>
+<p>大量 key 同时过期，数据库被打垮：</p>
+<p>解决方案：</p>
+<ol>
+<li>过期时间加随机值</li>
+</ol>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">int</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ttl </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 30</span><span style="color:#D73A49;--shiki-dark:#F97583"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 60</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ThreadLocalRandom.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">current</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">nextInt</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">300</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">opsForValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">().</span><span style="color:#6F42C1;--shiki-dark:#B392F0">set</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(key, value, ttl, TimeUnit.SECONDS);</span></span></code></pre>
+<ol start="2">
+<li>多级缓存（本地 + Redis）</li>
+<li>限流降级</li>
+</ol>
+<h2 id="缓存一致性">缓存一致性</h2>
+<p>更新策略取舍：</p>
+<ul>
+<li><strong>Cache Aside</strong>：先更新数据库，再删缓存</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Transactional</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> update</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(Product product) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    productMapper.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">updateById</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(product);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    redis.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">delete</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"product:"</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> product.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">getId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">());</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<ul>
+<li>允许短暂不一致的业务，删除缓存即可</li>
+<li>严格要求一致的，用消息队列或 CDC 订阅 binlog 刷新缓存</li>
+</ul>
+<h2 id="总结">总结</h2>
+<ul>
+<li>穿透：缓存空值 / 布隆过滤器</li>
+<li>击穿：互斥锁重建</li>
+<li>雪崩：过期时间加随机值、多级缓存</li>
+<li>更新：先 DB 后删缓存</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/redis-basics/"><div class="nav-label">← 上一篇</div><div class="nav-title">Redis 基础与数据结构</div></a><a class="next" href="/posts/redis-lock/"><div class="nav-label">下一篇 →</div><div class="nav-title">Redis 分布式锁</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#基本用法">基本用法</a></li><li style="margin-left:0rem"><a href="#缓存穿透">缓存穿透</a></li><li style="margin-left:0rem"><a href="#缓存击穿">缓存击穿</a></li><li style="margin-left:0rem"><a href="#缓存雪崩">缓存雪崩</a></li><li style="margin-left:0rem"><a href="#缓存一致性">缓存一致性</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

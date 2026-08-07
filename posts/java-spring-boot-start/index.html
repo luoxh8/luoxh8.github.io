@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Spring Boot 快速入门 · Luoxh&#39;s Blog</title><meta name="description" content="Spring Boot 让 Java 后端开发变得简单：内嵌 Tomcat、自动配置、起步依赖，开箱即用"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/java-spring-boot-start/"><meta property="og:type" content="website"><meta property="og:title" content="Spring Boot 快速入门 · Luoxh's Blog"><meta property="og:description" content="Spring Boot 让 Java 后端开发变得简单：内嵌 Tomcat、自动配置、起步依赖，开箱即用"><meta property="og:url" content="https://luoxh8.github.io/posts/java-spring-boot-start/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/Java/">Java</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #f97316, #ef4444)"><div class="hero-icon">🚀</div><h1>Spring Boot 快速入门</h1><p class="hero-desc">Spring Boot 让 Java 后端开发变得简单：内嵌 Tomcat、自动配置、起步依赖，开箱即用</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 1 分钟阅读</span><span class="hero-meta-chip">☕ Java</span></div></div><div class="prose"><p>Spring Boot 让 Java 后端开发变得简单：内嵌 Tomcat、自动配置、起步依赖，开箱即用。</p>
+<h2 id="创建项目">创建项目</h2>
+<p>推荐使用 <a href="https://start.spring.io/">Spring Initializr</a> 生成项目，选择 Java 17 + Spring Boot 3.x，勾选 Web 依赖。</p>
+<p>也可以用 Maven 直接建：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="xml"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-parent&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;3.3.5&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">version</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">parent</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;org.springframework.boot&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">groupId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        &lt;</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;spring-boot-starter-web&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">artifactId</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    &lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependency</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">&lt;/</span><span style="color:#22863A;--shiki-dark:#85E89D">dependencies</span><span style="color:#24292E;--shiki-dark:#E1E4E8">&gt;</span></span></code></pre>
+<h2 id="启动类">启动类</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">SpringBootApplication</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> DemoApplication</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> static</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> main</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#D73A49;--shiki-dark:#F97583">String</span><span style="color:#24292E;--shiki-dark:#E1E4E8">[] </span><span style="color:#E36209;--shiki-dark:#FFAB70">args</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        SpringApplication.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">run</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(DemoApplication.class, args);</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p><code>@SpringBootApplication</code> 组合了 <code>@Configuration</code>、<code>@EnableAutoConfiguration</code> 和 <code>@ComponentScan</code>。</p>
+<h2 id="第一个接口">第一个接口</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/api/users"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">GetMapping</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"/hello"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String </span><span style="color:#6F42C1;--shiki-dark:#B392F0">hello</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestParam</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String </span><span style="color:#E36209;--shiki-dark:#FFAB70">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "Hello, "</span><span style="color:#D73A49;--shiki-dark:#F97583"> +</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> name;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">PostMapping</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User </span><span style="color:#6F42C1;--shiki-dark:#B392F0">create</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(@</span><span style="color:#D73A49;--shiki-dark:#F97583">RequestBody</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> User </span><span style="color:#E36209;--shiki-dark:#FFAB70">user</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> user;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>启动后访问 <code>http://localhost:8080/api/users/hello?name=luoxh</code>。</p>
+<h2 id="依赖注入">依赖注入</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> String </span><span style="color:#6F42C1;--shiki-dark:#B392F0">greet</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "hi"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">RestController</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserController</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#D73A49;--shiki-dark:#F97583"> final</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> UserService userService;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">    // 构造器注入，推荐方式</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> UserController</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(UserService </span><span style="color:#E36209;--shiki-dark:#FFAB70">userService</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        this</span><span style="color:#24292E;--shiki-dark:#E1E4E8">.userService </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> userService;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="常用注解速查">常用注解速查</h2>
+<table>
+<thead>
+<tr>
+<th>注解</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@RestController</code></td>
+<td>REST 控制器，返回 JSON</td>
+</tr>
+<tr>
+<td><code>@Service</code> / <code>@Repository</code></td>
+<td>业务层 / 数据层组件</td>
+</tr>
+<tr>
+<td><code>@Autowired</code></td>
+<td>自动注入</td>
+</tr>
+<tr>
+<td><code>@Configuration</code></td>
+<td>配置类</td>
+</tr>
+<tr>
+<td><code>@Value</code></td>
+<td>读取配置项</td>
+</tr>
+<tr>
+<td><code>@Transactional</code></td>
+<td>开启事务</td>
+</tr>
+</tbody>
+</table>
+<h2 id="总结">总结</h2>
+<ul>
+<li>Spring Boot 通过自动配置和起步依赖简化开发</li>
+<li>组件用注解注册，通过依赖注入协作</li>
+<li>内嵌 Tomcat，打包成 jar 直接运行</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/java-spring-boot-config/"><div class="nav-label">← 上一篇</div><div class="nav-title">Spring Boot 配置管理</div></a><a class="next" href="/posts/java-thread-basics/"><div class="nav-label">下一篇 →</div><div class="nav-title">Java 多线程基础</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#创建项目">创建项目</a></li><li style="margin-left:0rem"><a href="#启动类">启动类</a></li><li style="margin-left:0rem"><a href="#第一个接口">第一个接口</a></li><li style="margin-left:0rem"><a href="#依赖注入">依赖注入</a></li><li style="margin-left:0rem"><a href="#常用注解速查">常用注解速查</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

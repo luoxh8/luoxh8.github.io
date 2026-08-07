@@ -1,0 +1,96 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jenkins 自动构建发布 · Luoxh&#39;s Blog</title><meta name="description" content="CI/CD 让发布从手动操作变成自动流程：代码提交 → 自动构建 → 自动部署"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/jenkins-cicd/"><meta property="og:type" content="website"><meta property="og:title" content="Jenkins 自动构建发布 · Luoxh's Blog"><meta property="og:description" content="CI/CD 让发布从手动操作变成自动流程：代码提交 → 自动构建 → 自动部署"><meta property="og:url" content="https://luoxh8.github.io/posts/jenkins-cicd/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E5%90%8E%E7%AB%AF%E4%B8%8EDevOps/">后端与DevOps</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #06b6d4, #22d3ee)"><div class="hero-icon">🤖</div><h1>Jenkins 自动构建发布</h1><p class="hero-desc">CI/CD 让发布从手动操作变成自动流程：代码提交 → 自动构建 → 自动部署</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 1 分钟阅读</span><span class="hero-meta-chip">⚙️ 后端与DevOps</span></div></div><div class="prose"><p>CI/CD 让发布从手动操作变成自动流程：代码提交 → 自动构建 → 自动部署。</p>
+<h2 id="jenkins-安装">Jenkins 安装</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jenkins</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 8080:8080</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -v</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jenkins_home:/var/jenkins_home</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -v</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /var/run/docker.sock:/var/run/docker.sock</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  jenkins/jenkins:lts</span></span></code></pre>
+<p>首次访问 <code>http://服务器:8080</code>，用初始密码解锁：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> exec</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> jenkins</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> cat</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /var/jenkins_home/secrets/initialAdminPassword</span></span></code></pre>
+<h2 id="pipeline-脚本">Pipeline 脚本</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="groovy"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">pipeline {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    agent any</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    environment {</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        APP_NAME</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'demo'</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">        SERVER</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '192.168.1.20'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    stages {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'拉取代码'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            steps { checkout scm }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'构建'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'mvn clean package -DskipTests'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'构建镜像'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'docker build -t demo:${BUILD_NUMBER} .'</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'部署'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">                sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'''</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                    scp target/demo.jar root@${SERVER}:/opt/demo/</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                    ssh root@${SERVER} "cd /opt/demo &amp;&amp; docker compose up -d --build"</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                '''</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">            }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="webhook-触发">Webhook 触发</h2>
+<p>在 GitHub 仓库 Settings → Webhooks 添加：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="text"><code><span class="line"><span>URL: http://jenkins.example.com/github-webhook/</span></span>
+<span class="line"><span>Content type: application/json</span></span></code></pre>
+<p>Jenkins 任务勾选 “GitHub hook trigger for GITScm polling”，之后每次 push 自动触发。</p>
+<h2 id="参数化构建">参数化构建</h2>
+<p>允许手动选择分支或环境：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="groovy"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">parameters {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    choice(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'ENV'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">choices</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: [</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'dev'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'prod'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">], </span><span style="color:#005CC5;--shiki-dark:#79B8FF">description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'环境'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    string(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">name</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'TAG'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">defaultValue</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'latest'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">description</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'镜像标签'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">stage(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'部署'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    steps {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        sh </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"ssh root@server 'cd /opt/${params.ENV} &amp;&amp; docker compose up -d'"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="邮件通知">邮件通知</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="groovy"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">post {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    failure {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        emailext(</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            subject</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"构建失败: ${env.JOB_NAME} #${env.BUILD_NUMBER}"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            body</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"请查看构建日志"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"dev@example.com"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        )</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="总结">总结</h2>
+<ul>
+<li>Pipeline 用代码描述构建流程，可版本化</li>
+<li>Webhook 实现提交即触发</li>
+<li>失败通知 + 构建产物归档是标配</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/java-thread-pool/"><div class="nav-label">← 上一篇</div><div class="nav-title">Java 线程池详解</div></a><a class="next" href="/posts/linux-commands/"><div class="nav-label">下一篇 →</div><div class="nav-title">Linux 常用命令</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#jenkins-安装">Jenkins 安装</a></li><li style="margin-left:0rem"><a href="#pipeline-脚本">Pipeline 脚本</a></li><li style="margin-left:0rem"><a href="#webhook-触发">Webhook 触发</a></li><li style="margin-left:0rem"><a href="#参数化构建">参数化构建</a></li><li style="margin-left:0rem"><a href="#邮件通知">邮件通知</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

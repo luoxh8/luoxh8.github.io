@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>RabbitMQ 入门 · Luoxh&#39;s Blog</title><meta name="description" content="RabbitMQ 是经典的消息中间件，用于解耦、异步、削峰"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/rabbitmq-basics/"><meta property="og:type" content="website"><meta property="og:title" content="RabbitMQ 入门 · Luoxh's Blog"><meta property="og:description" content="RabbitMQ 是经典的消息中间件，用于解耦、异步、削峰"><meta property="og:url" content="https://luoxh8.github.io/posts/rabbitmq-basics/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E4%B8%AD%E9%97%B4%E4%BB%B6/">数据库与中间件</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #10b981, #34d399)"><div class="hero-icon">🐇</div><h1>RabbitMQ 入门</h1><p class="hero-desc">RabbitMQ 是经典的消息中间件，用于解耦、异步、削峰</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 1 分钟阅读</span><span class="hero-meta-chip">🗄️ 数据库与中间件</span></div></div><div class="prose"><p>RabbitMQ 是经典的消息中间件，用于解耦、异步、削峰。</p>
+<h2 id="启动">启动</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 5672:5672</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 15672:15672</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  --name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> rabbitmq:3-management</span></span></code></pre>
+<p>管理台：<code>http://服务器:15672</code>（guest/guest）。</p>
+<h2 id="核心概念">核心概念</h2>
+<ul>
+<li><strong>Producer</strong>：发送消息的一方</li>
+<li><strong>Consumer</strong>：接收消息的一方</li>
+<li><strong>Exchange</strong>：交换机，负责路由</li>
+<li><strong>Queue</strong>：队列，存储消息</li>
+<li><strong>Routing Key</strong>：路由键，决定消息去哪个队列</li>
+</ul>
+<h2 id="四种交换机">四种交换机</h2>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>路由规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direct</td>
+<td>路由键完全匹配</td>
+</tr>
+<tr>
+<td>Topic</td>
+<td>路由键通配符匹配（<code>*</code> 单词、<code>#</code> 多词）</td>
+</tr>
+<tr>
+<td>Fanout</td>
+<td>广播给所有绑定队列</td>
+</tr>
+<tr>
+<td>Headers</td>
+<td>按消息头匹配</td>
+</tr>
+</tbody>
+</table>
+<h2 id="python-发送与接收">Python 发送与接收</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">pip</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> install</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> pika</span></span></code></pre>
+<p>发送：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pika</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">conn </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pika.BlockingConnection(pika.ConnectionParameters(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'localhost'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> conn.channel()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.queue_declare(</span><span style="color:#E36209;--shiki-dark:#FFAB70">queue</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'order_queue'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">durable</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.basic_publish(</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    exchange</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">''</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    routing_key</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'order_queue'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    body</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'{"orderId": 1001}'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#E36209;--shiki-dark:#FFAB70">    properties</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">pika.BasicProperties(</span><span style="color:#E36209;--shiki-dark:#FFAB70">delivery_mode</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 持久化</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">conn.close()</span></span></code></pre>
+<p>接收：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pika</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">def</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> callback</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(ch, method, properties, body):</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'收到:'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, body)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    ch.basic_ack(</span><span style="color:#E36209;--shiki-dark:#FFAB70">delivery_tag</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">method.delivery_tag)  </span><span style="color:#6A737D;--shiki-dark:#6A737D"># 确认消息</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">conn </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> pika.BlockingConnection(pika.ConnectionParameters(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'localhost'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">))</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> conn.channel()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.queue_declare(</span><span style="color:#E36209;--shiki-dark:#FFAB70">queue</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'order_queue'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">durable</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.basic_qos(</span><span style="color:#E36209;--shiki-dark:#FFAB70">prefetch_count</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.basic_consume(</span><span style="color:#E36209;--shiki-dark:#FFAB70">queue</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'order_queue'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">on_message_callback</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">callback)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.start_consuming()</span></span></code></pre>
+<h2 id="消息确认">消息确认</h2>
+<ul>
+<li><strong>自动确认</strong>：收到即删除，可能丢消息</li>
+<li><strong>手动确认 ack</strong>：处理成功才确认，失败可以重新入队</li>
+</ul>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.basic_ack(</span><span style="color:#E36209;--shiki-dark:#FFAB70">delivery_tag</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">method.delivery_tag)</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 或拒绝并重新入队</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.basic_nack(</span><span style="color:#E36209;--shiki-dark:#FFAB70">delivery_tag</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">method.delivery_tag, </span><span style="color:#E36209;--shiki-dark:#FFAB70">requeue</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">True</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span></code></pre>
+<h2 id="延迟队列">延迟队列</h2>
+<p>用死信队列（DLX）实现延迟消息：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">args </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    'x-dead-letter-exchange'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'dlx'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    'x-dead-letter-routing-key'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">'delay_queue'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    'x-message-ttl'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60000</span><span style="color:#6A737D;--shiki-dark:#6A737D">  # 1 分钟延迟</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ch.queue_declare(</span><span style="color:#E36209;--shiki-dark:#FFAB70">queue</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'delay_source'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">arguments</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">args)</span></span></code></pre>
+<h2 id="总结">总结</h2>
+<ul>
+<li>解耦、异步、削峰是三大价值</li>
+<li>生产环境务必：队列持久化 + 手动 ack</li>
+<li>用管理台观察队列堆积情况</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/quartz-task/"><div class="nav-label">← 上一篇</div><div class="nav-title">Quartz 定时任务</div></a><a class="next" href="/posts/rabbitmq-spring/"><div class="nav-label">下一篇 →</div><div class="nav-title">Spring Boot 集成 RabbitMQ</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#启动">启动</a></li><li style="margin-left:0rem"><a href="#核心概念">核心概念</a></li><li style="margin-left:0rem"><a href="#四种交换机">四种交换机</a></li><li style="margin-left:0rem"><a href="#python-发送与接收">Python 发送与接收</a></li><li style="margin-left:0rem"><a href="#消息确认">消息确认</a></li><li style="margin-left:0rem"><a href="#延迟队列">延迟队列</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

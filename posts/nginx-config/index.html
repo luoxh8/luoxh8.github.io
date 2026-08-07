@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nginx 常用配置 · Luoxh&#39;s Blog</title><meta name="description" content="Nginx 是高性能的 Web 服务器和反向代理，几乎是后端部署的标配"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/nginx-config/"><meta property="og:type" content="website"><meta property="og:title" content="Nginx 常用配置 · Luoxh's Blog"><meta property="og:description" content="Nginx 是高性能的 Web 服务器和反向代理，几乎是后端部署的标配"><meta property="og:url" content="https://luoxh8.github.io/posts/nginx-config/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E5%90%8E%E7%AB%AF%E4%B8%8EDevOps/">后端与DevOps</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #06b6d4, #22d3ee)"><div class="hero-icon">🌐</div><h1>Nginx 常用配置</h1><p class="hero-desc">Nginx 是高性能的 Web 服务器和反向代理，几乎是后端部署的标配</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 2 分钟阅读</span><span class="hero-meta-chip">⚙️ 后端与DevOps</span></div></div><div class="prose"><p>Nginx 是高性能的 Web 服务器和反向代理，几乎是后端部署的标配。</p>
+<h2 id="静态资源服务">静态资源服务</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="nginx"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    listen </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    server_name </span><span style="color:#24292E;--shiki-dark:#E1E4E8">example.com;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    root </span><span style="color:#24292E;--shiki-dark:#E1E4E8">/var/www/blog;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    index </span><span style="color:#24292E;--shiki-dark:#E1E4E8">index.html;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    location</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> / </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        try_files </span><span style="color:#24292E;--shiki-dark:#E1E4E8">$uri $uri/ /index.html;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="反向代理">反向代理</h2>
+<p>把请求转发给后端服务：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="nginx"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    listen </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    server_name </span><span style="color:#24292E;--shiki-dark:#E1E4E8">api.example.com;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    location</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> / </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        proxy_pass </span><span style="color:#24292E;--shiki-dark:#E1E4E8">http://127.0.0.1:8080;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        proxy_set_header </span><span style="color:#24292E;--shiki-dark:#E1E4E8">Host $host;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        proxy_set_header </span><span style="color:#24292E;--shiki-dark:#E1E4E8">X-Real-IP $remote_addr;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        proxy_set_header </span><span style="color:#24292E;--shiki-dark:#E1E4E8">X-Forwarded-For $proxy_add_x_forwarded_for;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        proxy_set_header </span><span style="color:#24292E;--shiki-dark:#E1E4E8">X-Forwarded-Proto $scheme;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="负载均衡">负载均衡</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="nginx"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">upstream</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> backend </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    server</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> 192.168.1.10:8080 </span><span style="color:#E36209;--shiki-dark:#FFAB70">weight</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">3</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    server 192.168.1.11:8080 </span><span style="color:#E36209;--shiki-dark:#FFAB70">weight</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#005CC5;--shiki-dark:#79B8FF">1</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    keepalive </span><span style="color:#005CC5;--shiki-dark:#79B8FF">32</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">server</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    listen </span><span style="color:#005CC5;--shiki-dark:#79B8FF">80</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    location</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> / </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        proxy_pass </span><span style="color:#24292E;--shiki-dark:#E1E4E8">http://backend;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<p>默认轮询，<code>weight</code> 控制权重，还可以用 <code>ip_hash</code> 做会话保持。</p>
+<h2 id="location-匹配规则">location 匹配规则</h2>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>优先级</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>=</code> 精确</td>
+<td>最高</td>
+<td><code>location = /login</code></td>
+</tr>
+<tr>
+<td><code>^~</code> 前缀</td>
+<td>次高</td>
+<td>不再查正则</td>
+</tr>
+<tr>
+<td><code>~</code> 正则</td>
+<td>中</td>
+<td>区分大小写</td>
+</tr>
+<tr>
+<td><code>~*</code> 正则</td>
+<td>中</td>
+<td>不区分大小写</td>
+</tr>
+<tr>
+<td><code>/</code> 通用</td>
+<td>最低</td>
+<td>兜底</td>
+</tr>
+</tbody>
+</table>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="nginx"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">location</span><span style="color:#D73A49;--shiki-dark:#F97583"> =</span><span style="color:#032F62;--shiki-dark:#DBEDFF"> /favicon.ico </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    log_not_found </span><span style="color:#005CC5;--shiki-dark:#79B8FF">off</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">location</span><span style="color:#D73A49;--shiki-dark:#F97583"> ^~</span><span style="color:#032F62;--shiki-dark:#DBEDFF"> /static/ </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    alias </span><span style="color:#24292E;--shiki-dark:#E1E4E8">/data/static/;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    expires </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30d</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">location</span><span style="color:#D73A49;--shiki-dark:#F97583"> ~*</span><span style="color:#032F62;--shiki-dark:#DBEDFF"> \.(png|jpg|css|js)$ </span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    expires </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30d</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="常见配置">常见配置</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="nginx"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 限制上传大小</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">client_max_body_size </span><span style="color:#005CC5;--shiki-dark:#79B8FF">50m</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># Gzip 压缩</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">gzip </span><span style="color:#005CC5;--shiki-dark:#79B8FF">on</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">gzip_types </span><span style="color:#24292E;--shiki-dark:#E1E4E8">text/plain text/css application/json application/javascript;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 超时设置</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">proxy_connect_timeout </span><span style="color:#005CC5;--shiki-dark:#79B8FF">5s</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">proxy_read_timeout </span><span style="color:#005CC5;--shiki-dark:#79B8FF">30s</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 访问日志格式</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">log_format </span><span style="color:#005CC5;--shiki-dark:#79B8FF">main</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '$</span><span style="color:#24292E;--shiki-dark:#E1E4E8">remote_addr</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> - $</span><span style="color:#24292E;--shiki-dark:#E1E4E8">remote_user</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> [$</span><span style="color:#24292E;--shiki-dark:#E1E4E8">time_local</span><span style="color:#032F62;--shiki-dark:#9ECBFF">] "$</span><span style="color:#24292E;--shiki-dark:#E1E4E8">request</span><span style="color:#032F62;--shiki-dark:#9ECBFF">" '</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">                '$</span><span style="color:#24292E;--shiki-dark:#E1E4E8">status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> $</span><span style="color:#24292E;--shiki-dark:#E1E4E8">body_bytes_sent</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "$</span><span style="color:#24292E;--shiki-dark:#E1E4E8">http_referer</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"'</span><span style="color:#24292E;--shiki-dark:#E1E4E8">;</span></span></code></pre>
+<h2 id="常用命令">常用命令</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">nginx</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -t</span><span style="color:#6A737D;--shiki-dark:#6A737D">                 # 测试配置</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">nginx</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -s</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> reload</span><span style="color:#6A737D;--shiki-dark:#6A737D">          # 平滑重载</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">nginx</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -s</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> stop</span><span style="color:#6A737D;--shiki-dark:#6A737D">            # 停止</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">systemctl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> status</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> nginx</span><span style="color:#6A737D;--shiki-dark:#6A737D">   # 查看状态</span></span></code></pre>
+<h2 id="总结">总结</h2>
+<ul>
+<li>静态资源与反向代理是 Nginx 两大核心场景</li>
+<li><code>try_files</code> 适合前端 SPA 路由</li>
+<li>改配置先 <code>nginx -t</code> 再 <code>reload</code></li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/mysql-transaction/"><div class="nav-label">← 上一篇</div><div class="nav-title">MySQL 事务与隔离级别</div></a><a class="next" href="/posts/nginx-https/"><div class="nav-label">下一篇 →</div><div class="nav-title">Nginx 配置 HTTPS</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#静态资源服务">静态资源服务</a></li><li style="margin-left:0rem"><a href="#反向代理">反向代理</a></li><li style="margin-left:0rem"><a href="#负载均衡">负载均衡</a></li><li style="margin-left:0rem"><a href="#location-匹配规则">location 匹配规则</a></li><li style="margin-left:0rem"><a href="#常见配置">常见配置</a></li><li style="margin-left:0rem"><a href="#常用命令">常用命令</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

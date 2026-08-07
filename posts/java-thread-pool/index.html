@@ -1,0 +1,102 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Java 线程池详解 · Luoxh&#39;s Blog</title><meta name="description" content="每次任务都 new Thread 很浪费资源"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/java-thread-pool/"><meta property="og:type" content="website"><meta property="og:title" content="Java 线程池详解 · Luoxh's Blog"><meta property="og:description" content="每次任务都 new Thread 很浪费资源"><meta property="og:url" content="https://luoxh8.github.io/posts/java-thread-pool/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/Java/">Java</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #f97316, #ef4444)"><div class="hero-icon">🏊</div><h1>Java 线程池详解</h1><p class="hero-desc">每次任务都 new Thread 很浪费资源</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 2 分钟阅读</span><span class="hero-meta-chip">☕ Java</span></div></div><div class="prose"><p>每次任务都 new Thread 很浪费资源。线程池复用线程，还能控制并发量。</p>
+<h2 id="核心参数">核心参数</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">ThreadPoolExecutor pool </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ThreadPoolExecutor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,                          </span><span style="color:#6A737D;--shiki-dark:#6A737D">// corePoolSize 核心线程数</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    4</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,                          </span><span style="color:#6A737D;--shiki-dark:#6A737D">// maximumPoolSize 最大线程数</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    60</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, TimeUnit.SECONDS,       </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 空闲线程存活时间</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LinkedBlockingQueue&lt;&gt;(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">100</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 任务队列</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ThreadPoolExecutor.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">CallerRunsPolicy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 拒绝策略</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">);</span></span></code></pre>
+<p>执行流程：</p>
+<ol>
+<li>线程数 &lt; 核心线程数 → 创建新线程执行</li>
+<li>线程数 ≥ 核心线程数 → 任务进队列</li>
+<li>队列满 → 创建新线程直到最大线程数</li>
+<li>还是满 → 执行拒绝策略</li>
+</ol>
+<h2 id="拒绝策略">拒绝策略</h2>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AbortPolicy</code></td>
+<td>抛异常（默认）</td>
+</tr>
+<tr>
+<td><code>CallerRunsPolicy</code></td>
+<td>调用线程自己执行</td>
+</tr>
+<tr>
+<td><code>DiscardPolicy</code></td>
+<td>静默丢弃</td>
+</tr>
+<tr>
+<td><code>DiscardOldestPolicy</code></td>
+<td>丢弃最旧任务</td>
+</tr>
+</tbody>
+</table>
+<p>生产环境推荐 <code>CallerRunsPolicy</code>，不会丢任务也不会压垮系统。</p>
+<h2 id="executors-工具类">Executors 工具类</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Executors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">newFixedThreadPool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">4</span><span style="color:#24292E;--shiki-dark:#E1E4E8">);     </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 固定线程数</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Executors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">newCachedThreadPool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();     </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 弹性线程池</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Executors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">newSingleThreadExecutor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(); </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 单线程</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">Executors.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">newScheduledThreadPool</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">); </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 定时任务</span></span></code></pre>
+<p><strong>注意</strong>：<code>newFixedThreadPool</code> 和 <code>newSingleThreadExecutor</code> 使用无界队列，任务积压可能耗尽内存；推荐直接使用 <code>ThreadPoolExecutor</code> 构造器，明确参数。</p>
+<h2 id="实战异步发邮件">实战：异步发邮件</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Configuration</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ThreadPoolConfig</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Bean</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mailExecutor"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ThreadPoolExecutor </span><span style="color:#6F42C1;--shiki-dark:#B392F0">mailExecutor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">() {</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">        return</span><span style="color:#D73A49;--shiki-dark:#F97583"> new</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> ThreadPoolExecutor</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">            2</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">4</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#005CC5;--shiki-dark:#79B8FF">60</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, TimeUnit.SECONDS,</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> LinkedBlockingQueue&lt;&gt;(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">200</span><span style="color:#24292E;--shiki-dark:#E1E4E8">),</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">            new</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ThreadPoolExecutor.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">CallerRunsPolicy</span><span style="color:#24292E;--shiki-dark:#E1E4E8">()</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        );</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">@</span><span style="color:#D73A49;--shiki-dark:#F97583">Service</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">public</span><span style="color:#D73A49;--shiki-dark:#F97583"> class</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> MailService</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    @</span><span style="color:#D73A49;--shiki-dark:#F97583">Resource</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    private</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> ThreadPoolExecutor mailExecutor;</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">    public</span><span style="color:#D73A49;--shiki-dark:#F97583"> void</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> sendAsync</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(String </span><span style="color:#E36209;--shiki-dark:#FFAB70">to</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, String </span><span style="color:#E36209;--shiki-dark:#FFAB70">content</span><span style="color:#24292E;--shiki-dark:#E1E4E8">) {</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        mailExecutor.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">execute</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(() </span><span style="color:#D73A49;--shiki-dark:#F97583">-&gt;</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">            // 发邮件逻辑</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">        });</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="关闭线程池">关闭线程池</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="java"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">pool.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">shutdown</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();                 </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 等任务执行完再关闭</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">pool.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">shutdownNow</span><span style="color:#24292E;--shiki-dark:#E1E4E8">();              </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 立即关闭</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">pool.</span><span style="color:#6F42C1;--shiki-dark:#B392F0">awaitTermination</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(</span><span style="color:#005CC5;--shiki-dark:#79B8FF">30</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, TimeUnit.SECONDS);  </span><span style="color:#6A737D;--shiki-dark:#6A737D">// 等待结束</span></span></code></pre>
+<h2 id="总结">总结</h2>
+<ul>
+<li>用 <code>ThreadPoolExecutor</code> 明确核心线程数、队列和拒绝策略</li>
+<li>避免无界队列</li>
+<li>项目结束时要优雅关闭线程池</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/java-thread-basics/"><div class="nav-label">← 上一篇</div><div class="nav-title">Java 多线程基础</div></a><a class="next" href="/posts/jenkins-cicd/"><div class="nav-label">下一篇 →</div><div class="nav-title">Jenkins 自动构建发布</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#核心参数">核心参数</a></li><li style="margin-left:0rem"><a href="#拒绝策略">拒绝策略</a></li><li style="margin-left:0rem"><a href="#executors-工具类">Executors 工具类</a></li><li style="margin-left:0rem"><a href="#实战异步发邮件">实战：异步发邮件</a></li><li style="margin-left:0rem"><a href="#关闭线程池">关闭线程池</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

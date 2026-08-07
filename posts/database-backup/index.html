@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>数据库备份与恢复 · Luoxh&#39;s Blog</title><meta name="description" content="没有备份的数据库，出事故只能祈祷"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/database-backup/"><meta property="og:type" content="website"><meta property="og:title" content="数据库备份与恢复 · Luoxh's Blog"><meta property="og:description" content="没有备份的数据库，出事故只能祈祷"><meta property="og:url" content="https://luoxh8.github.io/posts/database-backup/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E4%B8%AD%E9%97%B4%E4%BB%B6/">数据库与中间件</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #10b981, #34d399)"><div class="hero-icon">💾</div><h1>数据库备份与恢复</h1><p class="hero-desc">没有备份的数据库，出事故只能祈祷</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-07</span><span class="hero-meta-chip">⏱ 1 分钟阅读</span><span class="hero-meta-chip">🗄️ 数据库与中间件</span></div></div><div class="prose"><p>数据是命根子。没有备份的数据库，出事故只能祈祷。</p>
+<h2 id="mysql-逻辑备份">MySQL 逻辑备份</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 备份整个库</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysqldump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -uroot</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --single-transaction</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo.sql</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 只备份表结构</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysqldump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -uroot</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --no-data</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> schema.sql</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 压缩备份</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysqldump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -uroot</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --single-transaction</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> gzip</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo_</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">date</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> +%F</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.sql.gz</span></span></code></pre>
+<p><code>--single-transaction</code> 保证备份期间数据一致，不锁表。</p>
+<h2 id="mysql-恢复">MySQL 恢复</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysql</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -uroot</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span><span style="color:#D73A49;--shiki-dark:#F97583"> &lt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo.sql</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">gunzip</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -c</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo_2026-08-07.sql.gz</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span><span style="color:#6F42C1;--shiki-dark:#B392F0"> mysql</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -uroot</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span></span></code></pre>
+<h2 id="mongodb-备份">MongoDB 备份</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 备份</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mongodump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --uri=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mongodb://localhost:27017"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -o</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /backup</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 恢复</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mongorestore</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --uri=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"mongodb://localhost:27017"</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /backup/demo</span></span></code></pre>
+<h2 id="定时备份脚本">定时备份脚本</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D">#!/bin/bash</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">BACKUP_DIR</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/backup/mysql</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">DATE</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$(</span><span style="color:#6F42C1;--shiki-dark:#B392F0">date</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> +%F</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mkdir</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$BACKUP_DIR</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">mysqldump</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -uroot</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF">'密码'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --single-transaction</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> demo</span><span style="color:#D73A49;--shiki-dark:#F97583"> |</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">    gzip</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$BACKUP_DIR</span><span style="color:#032F62;--shiki-dark:#9ECBFF">/demo_</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$DATE</span><span style="color:#032F62;--shiki-dark:#9ECBFF">.sql.gz"</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#6A737D;--shiki-dark:#6A737D"># 保留最近 7 天</span></span>
+<span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">find</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "</span><span style="color:#24292E;--shiki-dark:#E1E4E8">$BACKUP_DIR</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "*.sql.gz"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -mtime</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> +7</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -delete</span></span></code></pre>
+<p>crontab 每天凌晨 2 点执行：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="shell"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">0</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> 2</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> *</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> *</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /opt/scripts/backup-mysql.sh</span><span style="color:#D73A49;--shiki-dark:#F97583"> &gt;&gt;</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> /var/log/backup.log</span><span style="color:#D73A49;--shiki-dark:#F97583"> 2&gt;&amp;1</span></span></code></pre>
+<h2 id="备份策略">备份策略</h2>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>频率</th>
+<th>保留</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全量备份</td>
+<td>每天</td>
+<td>7~30 天</td>
+</tr>
+<tr>
+<td>增量/binlog</td>
+<td>实时/每小时</td>
+<td>按磁盘</td>
+</tr>
+<tr>
+<td>异地备份</td>
+<td>每天</td>
+<td>长期</td>
+</tr>
+</tbody>
+</table>
+<p>MySQL 主从本身不是备份，误删数据主从一起删。真正的保障是定时全量 + binlog 恢复。</p>
+<h2 id="恢复演练">恢复演练</h2>
+<p>备份不演练等于没备份。定期：</p>
+<ol>
+<li>在测试库导入最新备份</li>
+<li>验证数据完整性与业务可用</li>
+<li>记录恢复耗时，评估 RTO/RPO</li>
+</ol>
+<h2 id="总结">总结</h2>
+<ul>
+<li>全量 + binlog/增量，异地存储</li>
+<li>备份脚本加日志和保留策略</li>
+<li>定期做恢复演练</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/charles-debug/"><div class="nav-label">← 上一篇</div><div class="nav-title">Charles 抓包调试</div></a><a class="next" href="/posts/docker-compose/"><div class="nav-label">下一篇 →</div><div class="nav-title">Docker Compose 编排</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#mysql-逻辑备份">MySQL 逻辑备份</a></li><li style="margin-left:0rem"><a href="#mysql-恢复">MySQL 恢复</a></li><li style="margin-left:0rem"><a href="#mongodb-备份">MongoDB 备份</a></li><li style="margin-left:0rem"><a href="#定时备份脚本">定时备份脚本</a></li><li style="margin-left:0rem"><a href="#备份策略">备份策略</a></li><li style="margin-left:0rem"><a href="#恢复演练">恢复演练</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

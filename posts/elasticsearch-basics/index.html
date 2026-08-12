@@ -1,0 +1,118 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Elasticsearch 基础入门 · Luoxh&#39;s Blog</title><meta name="description" content="Elasticsearch 是开源的分布式搜索与分析引擎，能对海量文本做毫秒级搜索，底层靠 Lucene 实现，对外暴露 JSON 风格的 REST 接口"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/elasticsearch-basics/"><meta property="og:type" content="website"><meta property="og:title" content="Elasticsearch 基础入门 · Luoxh's Blog"><meta property="og:description" content="Elasticsearch 是开源的分布式搜索与分析引擎，能对海量文本做毫秒级搜索，底层靠 Lucene 实现，对外暴露 JSON 风格的 REST 接口"><meta property="og:url" content="https://luoxh8.github.io/posts/elasticsearch-basics/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E4%B8%AD%E9%97%B4%E4%BB%B6/">数据库与中间件</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #10b981, #34d399)"><div class="hero-icon">🔎</div><h1>Elasticsearch 基础入门</h1><p class="hero-desc">Elasticsearch 是开源的分布式搜索与分析引擎，能对海量文本做毫秒级搜索，底层靠 Lucene 实现，对外暴露 JSON 风格的 REST 接口</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2026-08-13</span><span class="hero-meta-chip">⏱ 3 分钟阅读</span><span class="hero-meta-chip">🗄️ 数据库与中间件</span></div></div><div class="prose"><p>Elasticsearch 是开源的分布式搜索与分析引擎，能对海量文本做毫秒级搜索，底层靠 Lucene 实现，对外暴露 JSON 风格的 REST 接口。</p>
+<h2 id="核心概念">核心概念</h2>
+<p>和关系型数据库做类比：</p>
+<table>
+<thead>
+<tr>
+<th>Elasticsearch</th>
+<th>关系型数据库</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Index（索引）</td>
+<td>Database（库）</td>
+</tr>
+<tr>
+<td>Type（已废弃）</td>
+<td>Table（表）</td>
+</tr>
+<tr>
+<td>Document（文档)</td>
+<td>Row（行）</td>
+</tr>
+<tr>
+<td>Field（字段）</td>
+<td>Column（列）</td>
+</tr>
+</tbody>
+</table>
+<h2 id="安装与启动">安装与启动</h2>
+<p>推荐用 Docker 快速起一个单节点：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">docker</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> run</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> --name</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> es</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -p</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 9200:9200</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -e</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "discovery.type=single-node"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  -e</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> "xpack.security.enabled=false"</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> \</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  docker.elastic.co/elasticsearch/elasticsearch:8.12.0</span></span></code></pre>
+<p>验证：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> http://localhost:9200</span></span></code></pre>
+<h2 id="倒排索引">倒排索引</h2>
+<p>ES 为什么快？因为它不按文档扫描，而是把文本切词后建立<strong>单词 → 文档列表</strong>的映射：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="plaintext"><code><span class="line"><span>"Elasticsearch 是搜索引擎"</span></span>
+<span class="line"><span>=&gt;</span></span>
+<span class="line"><span>  elasticsearch -&gt; doc1</span></span>
+<span class="line"><span>  是            -&gt; doc1</span></span>
+<span class="line"><span>  搜索引擎      -&gt; doc1</span></span></code></pre>
+<p>查询 “搜索引擎” 时直接定位到包含该词的文档，无需全文遍历。分词由分析器（Analyzer）完成，中文常用 <code>ik</code> 或 <code>smartcn</code> 分词器。</p>
+<h2 id="创建索引">创建索引</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> PUT</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> localhost:9200/article</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "settings": { "number_of_shards": 1, "number_of_replicas": 0 },</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "mappings": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "properties": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      "title":  { "type": "text", "analyzer": "ik_max_word" },</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      "price":  { "type": "integer" },</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">      "tags":   { "type": "keyword" }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">}'</span></span></code></pre>
+<p>注意：<code>text</code> 类型会被分词用于全文搜索，<code>keyword</code> 类型整体匹配用于精确过滤和聚合。</p>
+<h2 id="写入与查询">写入与查询</h2>
+<p>写入文档：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> localhost:9200/article/_doc</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "title": "Python 异步编程实践",</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "price": 10,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "tags": ["Python", "异步"]</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">}'</span></span></code></pre>
+<p>全文搜索：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> localhost:9200/article/_search</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "query": { "match": { "title": "异步编程" } }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">}'</span></span></code></pre>
+<p>结构化过滤：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> localhost:9200/article/_search</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "query": { "bool": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "must":   [ { "term": { "tags": "Python" } } ],</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "filter": [ { "range": { "price": { "lte": 20 } } } ]</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  } }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">}'</span></span></code></pre>
+<h2 id="聚合分析">聚合分析</h2>
+<p>按标签统计热门分类：</p>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="bash"><code><span class="line"><span style="color:#6F42C1;--shiki-dark:#B392F0">curl</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -X</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> POST</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> localhost:9200/article/_search</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -H</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> 'Content-Type: application/json'</span><span style="color:#005CC5;--shiki-dark:#79B8FF"> -d</span><span style="color:#032F62;--shiki-dark:#9ECBFF"> '{</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "size": 0,</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  "aggs": {</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">    "hot_tags": { "terms": { "field": "tags.keyword" } }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">  }</span></span>
+<span class="line"><span style="color:#032F62;--shiki-dark:#9ECBFF">}'</span></span></code></pre>
+<p><code>size: 0</code> 表示不返回文档，只返回聚合结果。</p>
+<h2 id="python-客户端">Python 客户端</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="python"><code><span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">from</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> elasticsearch </span><span style="color:#D73A49;--shiki-dark:#F97583">import</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Elasticsearch</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">es </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> Elasticsearch(</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"http://localhost:9200"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">)</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">resp </span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> es.search(</span><span style="color:#E36209;--shiki-dark:#FFAB70">index</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"article"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">, </span><span style="color:#E36209;--shiki-dark:#FFAB70">query</span><span style="color:#D73A49;--shiki-dark:#F97583">=</span><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"match"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: {</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"title"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"异步"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">}})</span></span>
+<span class="line"><span style="color:#D73A49;--shiki-dark:#F97583">for</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> hit </span><span style="color:#D73A49;--shiki-dark:#F97583">in</span><span style="color:#24292E;--shiki-dark:#E1E4E8"> resp[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hits"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">][</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"hits"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">]:</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">    print</span><span style="color:#24292E;--shiki-dark:#E1E4E8">(hit[</span><span style="color:#032F62;--shiki-dark:#9ECBFF">"_source"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">])</span></span></code></pre>
+<h2 id="与-mysql-的关系">与 MySQL 的关系</h2>
+<p>ES 凭借灵活性替代 MySQL 做模糊搜索，但<strong>做不了事务和复杂关联</strong>。常见架构：MySQL 作为主存储，通过 CDC（如 Canal / Logstash）把数据同步到 ES 提供搜索，保证两边一致。</p>
+<h2 id="总结">总结</h2>
+<ul>
+<li>Index/Type/Document 对应库/表/行</li>
+<li>倒排索引 + 分词是全文检索快的根本</li>
+<li><code>text</code> 分词用于 match 搜索，<code>keyword</code> 用于 term/聚合</li>
+<li>聚合查询配合 <code>size: 0</code> 拿统计结果</li>
+<li>ES 一般与 MySQL 搭配，负责搜索部分</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><span></span><a class="next" href="/posts/java-spring-boot-start/"><div class="nav-label">下一篇 →</div><div class="nav-title">Spring Boot 快速入门</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#核心概念">核心概念</a></li><li style="margin-left:0rem"><a href="#安装与启动">安装与启动</a></li><li style="margin-left:0rem"><a href="#倒排索引">倒排索引</a></li><li style="margin-left:0rem"><a href="#创建索引">创建索引</a></li><li style="margin-left:0rem"><a href="#写入与查询">写入与查询</a></li><li style="margin-left:0rem"><a href="#聚合分析">聚合分析</a></li><li style="margin-left:0rem"><a href="#python-客户端">Python 客户端</a></li><li style="margin-left:0rem"><a href="#与-mysql-的关系">与 MySQL 的关系</a></li><li style="margin-left:0rem"><a href="#总结">总结</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>VS Code 效率插件与技巧 · Luoxh&#39;s Blog</title><meta name="description" content="VS Code 轻量且插件生态强大"><meta name="generator" content="Astro v7.1.6"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="canonical" href="https://luoxh8.github.io/posts/vscode-tips/"><meta property="og:type" content="website"><meta property="og:title" content="VS Code 效率插件与技巧 · Luoxh's Blog"><meta property="og:description" content="VS Code 轻量且插件生态强大"><meta property="og:url" content="https://luoxh8.github.io/posts/vscode-tips/"><meta property="og:image" content="https://luoxh8.github.io/img/avatar.png"><meta property="og:site_name" content="Luoxh's Blog"><meta name="twitter:card" content="summary_large_image"><meta name="theme-color" content="#6366f1"><script>
+      (function () {
+        var stored = localStorage.getItem('luoxh-theme');
+        var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var queryTheme = new URLSearchParams(location.search).get('theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          queryTheme === 'dark' || queryTheme === 'light'
+            ? queryTheme
+            : stored === 'dark' || stored === 'light'
+              ? stored
+              : prefers
+                ? 'dark'
+                : 'light'
+        );
+      })();
+    </script><link rel="stylesheet" href="/assets/Base.D_O7f4W2.css"></head><body><div class="progress-bar" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a href="/" class="brand" aria-label="首页"><span class="brand-mark">L</span><span class="brand-name">Luoxh's Blog</span></a><nav class="main-nav" aria-label="主导航"><a href="/">首页</a><a href="/archives/" class="active">归档</a><a href="/categories/">分类</a><a href="/tags/">标签</a><a href="/search/">搜索</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/wx/">微信</a></nav><div class="header-actions"><button class="icon-btn theme-toggle" aria-label="切换主题"></button><button class="icon-btn menu-toggle" aria-label="菜单" aria-expanded="false">☰</button></div></div></header><div class="page"><div class="container post-layout"><article class="post-article"><nav class="post-header" aria-label="面包屑"><div class="post-crumbs"><a href="/">首页</a><span>/</span><a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/">开发工具</a><span>/</span><span>正文</span></div></nav><div class="post-hero" style="background:linear-gradient(135deg, #f59e0b, #f97316)"><div class="hero-icon">🛠️</div><h1>VS Code 效率插件与技巧</h1><p class="hero-desc">VS Code 轻量且插件生态强大</p><div class="hero-inner-meta"><span class="hero-meta-chip">📅 2021-09-28</span><span class="hero-meta-chip">⏱ 1 分钟阅读</span><span class="hero-meta-chip">🛠️ 开发工具</span></div></div><div class="prose"><p>VS Code 轻量且插件生态强大。</p>
+<h2 id="必装插件">必装插件</h2>
+<ul>
+<li>Chinese (Simplified) Language Pack：中文界面</li>
+<li>Python / Java Extension Pack：语言支持</li>
+<li>Prettier / ESLint：格式化与规范</li>
+<li>GitLens：增强 Git 注解</li>
+<li>Docker / Kubernetes：容器集成</li>
+<li>Error Lens：行内显示错误</li>
+</ul>
+<h2 id="提效快捷键">提效快捷键</h2>
+<ul>
+<li><code>Ctrl+Shift+P</code>：命令面板</li>
+<li><code>Ctrl+P</code>：快速打开文件</li>
+<li><code>Alt+Click</code>：多光标</li>
+<li><code>Ctrl+D</code>：选中下一个相同词</li>
+<li><code>Ctrl+`` </code>：集成终端</li>
+<li><code>Ctrl+K Ctrl+S</code>：快捷键设置</li>
+</ul>
+<h2 id="用户设置片段">用户设置片段</h2>
+<pre class="astro-code astro-code-themes github-light github-dark" style="background-color:#fff;--shiki-dark-bg:#24292e;color:#24292e;--shiki-dark:#e1e4e8; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "editor.formatOnSave"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#005CC5;--shiki-dark:#79B8FF">true</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "editor.multiCursorModifier"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"alt"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "files.autoSave"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"afterDelay"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#005CC5;--shiki-dark:#79B8FF">  "workbench.colorTheme"</span><span style="color:#24292E;--shiki-dark:#E1E4E8">: </span><span style="color:#032F62;--shiki-dark:#9ECBFF">"Default Dark+"</span></span>
+<span class="line"><span style="color:#24292E;--shiki-dark:#E1E4E8">}</span></span></code></pre>
+<h2 id="技巧">技巧</h2>
+<ul>
+<li>命令面板输入 <code>&gt;format</code> 选格式化。</li>
+<li>选中代码按 <code>Ctrl+K Ctrl+F</code> 格式化选区。</li>
+<li><code>Ctrl+Shift+M</code> 打开问题面板集中看错误。</li>
+</ul>
+</div><nav class="post-nav" aria-label="上一篇下一篇"><a href="/posts/redis-cache/"><div class="nav-label">← 上一篇</div><div class="nav-title">Redis 缓存实战</div></a><a class="next" href="/posts/java-mybatis/"><div class="nav-label">下一篇 →</div><div class="nav-title">MyBatis 使用指南</div></a></nav></article><aside class="post-toc"><h4>目录</h4><ul><li style="margin-left:0rem"><a href="#必装插件">必装插件</a></li><li style="margin-left:0rem"><a href="#提效快捷键">提效快捷键</a></li><li style="margin-left:0rem"><a href="#用户设置片段">用户设置片段</a></li><li style="margin-left:0rem"><a href="#技巧">技巧</a></li></ul></aside></div></div><footer class="site-footer"><div class="container footer-inner"><div class="footer-links"><a href="/">首页</a><a href="/archives/">归档</a><a href="/tech/">技术</a><a href="/love/">回忆</a><a href="/resume/">简历</a><a href="/about/">关于</a><a href="/rss.xml" target="_blank" rel="noopener">RSS</a><a href="https://github.com/luoxh8" target="_blank" rel="noopener">GitHub</a><a href="mailto:luoxh8@qq.com">邮箱</a></div><div class="footer-copy">© 2018–2026 Luoxh · 用 <span class="heart">♥</span> 与 Astro 构建 · 本站内容均为原创</div></div></footer><button class="back-top" aria-label="回到顶部">↑</button><script type="module" src="/assets/Base.astro_astro_type_script_index_0_lang.DvmUYuof.js"></script></body></html>
